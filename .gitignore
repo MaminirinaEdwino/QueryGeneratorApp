@@ -1,0 +1,7 @@
+.gradle
+.vscode
+wrapper
+build
+log.txt
+gradlew
+gradlew.bat

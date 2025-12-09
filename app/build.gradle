@@ -1,0 +1,35 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'com.monentreprise.monquerygenerator' // Le package principal
+    compileSdk 34 // La version de SDK utilisée pour la compilation
+
+    defaultConfig {
+        applicationId "com.monentreprise.monquerygenerator"
+        minSdk 24 // Le niveau API Android minimum supporté
+        targetSdk 34 // Le niveau API cible
+        versionCode 1
+        versionName "1.0"
+    }
+}
+
+dependencies {
+    // Dépendance essentielle pour le support des classes de base Android
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}
+
+android {
+    // ...
+    compileOptions {
+        // Cette section doit correspondre à votre installation
+        sourceCompatibility JavaVersion.VERSION_17 // ou 11, 17, etc.
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+// java {
+//     toolchain {
+//         // Force Gradle à trouver et utiliser un JDK 21 pour l'exécution des tâches de compilation.
+//         // Cela fonctionne indépendamment des paramètres source/target ci-dessus.
+//         languageVersion = JavaLanguageVersion.of(17)
+//     }
+// }
