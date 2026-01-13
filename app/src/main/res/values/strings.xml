@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">Query Generator</string>
-    <string name="hello_world">Bonjour, Monde! Ceci est mon premier application mobile avec java Donc elle est completement moche . Hahahaha !!!!! </string>
-    <string name="second_text">Ceci est le deuxième TextView ajouté récemment.</string>
+    <string name="newbtn">Data</string>
 </resources>

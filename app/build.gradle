@@ -3,13 +3,16 @@ apply plugin: 'com.android.application'
 android {
     namespace 'com.monentreprise.monquerygenerator' // Le package principal
     compileSdk 34 // La version de SDK utilisée pour la compilation
-
+    
     defaultConfig {
         applicationId "com.monentreprise.monquerygenerator"
         minSdk 24 // Le niveau API Android minimum supporté
         targetSdk 34 // Le niveau API cible
         versionCode 1
         versionName "1.0"
+    }
+    buildFeatures{
+        viewBinding true
     }
 }
 
