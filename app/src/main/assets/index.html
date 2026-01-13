@@ -1,15 +1,50 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; padding: 15px; background: #f4f4f4; }
-        .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
-        input, select { width: 100%; margin: 5px 0; padding: 8px; box-sizing: border-box; }
-        button { background: #007bff; color: white; border: none; padding: 10px; border-radius: 5px; width: 100%; }
-        pre { background: #333; color: #fff; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        body {
+            font-family: sans-serif;
+            padding: 15px;
+            background: #f4f4f4;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="card">
@@ -32,7 +67,9 @@
 
     <h3>Résultat :</h3>
     <pre id="output">Le SQL s'affichera ici...</pre>
-
+    <button onclick="exportSQL()" style="background: #ffc107; color: black; margin-top: 10px;">
+        EXPORTER EN .SQL
+    </button>
     <!-- <script>
         function addField() {
             let div = document.createElement('div');
@@ -68,11 +105,27 @@
         }
     </script> -->
     <script>
+        function exportSQL() {
+            // On récupère le texte généré dans la balise <pre>
+            let sqlContent = document.getElementById('output').innerText;
+
+            if (sqlContent === "" || sqlContent.includes("s'affichera ici")) {
+                alert("Générez d'abord le SQL !");
+                return;
+            }
+
+            // On appelle la fonction Java
+            if (window.AndroidBridge) {
+                window.AndroidBridge.saveSqlFile(sqlContent);
+            } else {
+                alert("Erreur : Le pont Android n'est pas détecté.");
+            }
+        }
         function addField() {
-    let container = document.getElementById('fieldsContainer');
-    let div = document.createElement('div');
-    div.className = 'field-row card'; // On réutilise une petite carte pour chaque champ
-    div.innerHTML = `
+            let container = document.getElementById('fieldsContainer');
+            let div = document.createElement('div');
+            div.className = 'field-row card'; // On réutilise une petite carte pour chaque champ
+            div.innerHTML = `
         <input type="text" placeholder="Nom du champ (ex: nom)" class="f-name">
         <select class="f-type">
             <option value="INT">INT (Nombre)</option>
@@ -82,61 +135,62 @@
         </select>
         <button onclick="this.parentElement.remove()" style="background:red; font-size:10px; width:auto; padding:2px 5px;">Supprimer</button>
     `;
-    container.appendChild(div);
-}
-
-function generate() {
-    let table = document.getElementById('tableName').value.trim() || "ma_table";
-    let names = document.querySelectorAll('.f-name');
-    let types = document.querySelectorAll('.f-type');
-    
-    let fields = [];
-    for(let i=0; i < names.length; i++) {
-        if(names[i].value.trim() !== "") {
-            fields.push({
-                name: names[i].value.trim(),
-                type: types[i].value
-            });
+            container.appendChild(div);
         }
-    }
 
-    if(fields.length === 0) {
-        alert("Ajoutez au moins un champ !");
-        return;
-    }
+        function generate() {
+            let table = document.getElementById('tableName').value.trim() || "ma_table";
+            let names = document.querySelectorAll('.f-name');
+            let types = document.querySelectorAll('.f-type');
 
-    // --- 1. CREATE TABLE ---
-    let sqlCreate = `CREATE TABLE ${table} (\n`;
-    sqlCreate += fields.map(f => `  ${f.name} ${f.type}`).join(",\n");
-    sqlCreate += `\n);`;
+            let fields = [];
+            for (let i = 0; i < names.length; i++) {
+                if (names[i].value.trim() !== "") {
+                    fields.push({
+                        name: names[i].value.trim(),
+                        type: types[i].value
+                    });
+                }
+            }
 
-    // --- 2. SELECT ---
-    let sqlSelect = `SELECT ${fields.map(f => f.name).join(", ")} FROM ${table};`;
+            if (fields.length === 0) {
+                alert("Ajoutez au moins un champ !");
+                return;
+            }
 
-    // --- 3. INSERT (avec des valeurs fictives de test) ---
-    let valPlaceholder = fields.map(f => {
-        if(f.type.includes("INT")) return "10";
-        if(f.type === "DATE") return "'2024-01-01'";
-        return "'valeur'";
-    }).join(", ");
-    
-    let sqlInsert = `INSERT INTO ${table} (${fields.map(f => f.name).join(", ")}) \nVALUES (${valPlaceholder});`;
+            // --- 1. CREATE TABLE ---
+            let sqlCreate = `CREATE TABLE ${table} (\n`;
+            sqlCreate += fields.map(f => `  ${f.name} ${f.type}`).join(",\n");
+            sqlCreate += `\n);`;
 
-    // --- 4. UPDATE ---
-    let updatePairs = fields.map(f => {
-        let val = f.type.includes("INT") ? "10" : "'nouvelle_valeur'";
-        return `${f.name} = ${val}`;
-    }).join(", ");
-    
-    let sqlUpdate = `UPDATE ${table} SET ${updatePairs} WHERE id = 1;`;
+            // --- 2. SELECT ---
+            let sqlSelect = `SELECT ${fields.map(f => f.name).join(", ")} FROM ${table};`;
 
-    // Affichage final
-    document.getElementById('output').innerText = 
-        `-- STRUCTURE\n${sqlCreate}\n\n` +
-        `-- SELECTION\n${sqlSelect}\n\n` +
-        `-- INSERTION (Exemple)\n${sqlInsert}\n\n` +
-        `-- MISE À JOUR (Exemple)\n${sqlUpdate}`;
-}
+            // --- 3. INSERT (avec des valeurs fictives de test) ---
+            let valPlaceholder = fields.map(f => {
+                if (f.type.includes("INT")) return "10";
+                if (f.type === "DATE") return "'2024-01-01'";
+                return "'valeur'";
+            }).join(", ");
+
+            let sqlInsert = `INSERT INTO ${table} (${fields.map(f => f.name).join(", ")}) \nVALUES (${valPlaceholder});`;
+
+            // --- 4. UPDATE ---
+            let updatePairs = fields.map(f => {
+                let val = f.type.includes("INT") ? "10" : "'nouvelle_valeur'";
+                return `${f.name} = ${val}`;
+            }).join(", ");
+
+            let sqlUpdate = `UPDATE ${table} SET ${updatePairs} WHERE id = 1;`;
+
+            // Affichage final
+            document.getElementById('output').innerText =
+                `-- STRUCTURE\n${sqlCreate}\n\n` +
+                `-- SELECTION\n${sqlSelect}\n\n` +
+                `-- INSERTION (Exemple)\n${sqlInsert}\n\n` +
+                `-- MISE À JOUR (Exemple)\n${sqlUpdate}`;
+        }
     </script>
 </body>
+
 </html>
