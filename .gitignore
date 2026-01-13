@@ -5,3 +5,5 @@ build
 log.txt
 gradlew
 gradlew.bat
+querygenerator.jks
+sign_command.sh

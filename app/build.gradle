@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+def props = new Properties()
+def propFile = rootProject.file('local.properties')
+if (propFile.exists()) {
+    props.load(new FileInputStream(propFile))
+}
+
 android {
     namespace 'com.monentreprise.monquerygenerator' // Le package principal
     compileSdk 34 // La version de SDK utilisée pour la compilation
@@ -27,6 +33,21 @@ android {
         // Cette section doit correspondre à votre installation
         sourceCompatibility JavaVersion.VERSION_17 // ou 11, 17, etc.
         targetCompatibility JavaVersion.VERSION_17
+    }
+    signingConfigs {
+        release {
+            storeFile file(props['key.store']) // Chemin vers votre fichier
+            storePassword props['key.alias.password']
+            keyAlias props['key.alias']
+            keyPassword props['key.store.password']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release // On lie la signature au mode release
+        }
     }
 }
 // java {
