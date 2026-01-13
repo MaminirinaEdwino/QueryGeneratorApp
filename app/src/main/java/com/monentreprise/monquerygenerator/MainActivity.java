@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); 
+        getWindow().setStatusBarColor(android.graphics.Color.parseColor("#6200EE"));
 
         if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) 
             != android.content.pm.PackageManager.PERMISSION_GRANTED) {

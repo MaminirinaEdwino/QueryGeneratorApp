@@ -4,6 +4,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /*
         body {
             font-family: sans-serif;
             padding: 15px;
@@ -41,12 +42,140 @@
             border-radius: 5px;
             overflow-x: auto;
             font-size: 12px;
+        }*/
+        /* Variables de couleurs Material Design */
+        :root {
+            --primary: #6200EE;
+            --primary-variant: #3700B3;
+            --secondary: #03DAC6;
+            --background: #F5F5F5;
+            --surface: #FFFFFF;
+            --error: #B00020;
+            --text-on-surface: #000000;
         }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            color: var(--text-on-surface);
+            padding-bottom: 80px; /* Espace pour le bouton fixe */
+        }
+
+        /* Barre d'en-tête (Top App Bar) */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 { margin: 0; font-size: 20px; font-weight: 500; }
+
+        .container { padding: 16px; }
+
+        /* Style des "Cards" */
+        .card {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+
+        /* Inputs flottants simplifiés */
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background: #fafafa;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: white;
+        }
+
+        /* Boutons */
+        .btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-add { background-color: var(--secondary); color: #000; width: 100%; }
+        .btn-delete { background-color: transparent; color: var(--error); margin-top: 5px; width: auto; font-size: 12px;}
+        
+        /* Bouton Générer flottant en bas */
+        .fab-container {
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-main { background-color: var(--primary); color: white; flex: 2; elevation: 6; }
+        .btn-export { background-color: #4CAF50; color: white; flex: 1; }
+
+        /* Zone de code */
+        pre {
+            background: #263238;
+            color: #80CBC4;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .field-row { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
     </style>
 </head>
 
 <body>
+    <header>
+        <h1>QueryGenerator</h1>
+    </header>
 
+    <div class="container">
+        <div class="card">
+            <label style="font-weight: bold;">Table</label>
+            <input type="text" id="tableName" placeholder="Nom de la table (ex: users)">
+        </div>
+
+        <div id="fieldsContainer">
+            </div>
+
+        <button class="btn btn-add" onclick="addField()">+ Ajouter un champ</button>
+
+        <div class="card" style="margin-top: 20px;">
+            <label style="font-weight: bold;">SQL Généré</label>
+            <pre id="output">Appuyez sur GÉNÉRER...</pre>
+        </div>
+    </div>
+
+    <div class="fab-container">
+        <button class="btn btn-main" onclick="generate()">Générer</button>
+        <button class="btn btn-export" onclick="exportSQL()">Export .SQL</button>
+    </div>
+    <!--
     <div class="card">
         <h3>Configuration Table</h3>
         <input type="text" id="tableName" placeholder="Nom de la table (ex: utilisateurs)">
@@ -69,7 +198,7 @@
     <pre id="output">Le SQL s'affichera ici...</pre>
     <button onclick="exportSQL()" style="background: #ffc107; color: black; margin-top: 10px;">
         EXPORTER EN .SQL
-    </button>
+    </button>-->
     <!-- <script>
         function addField() {
             let div = document.createElement('div');
@@ -121,20 +250,36 @@
                 alert("Erreur : Le pont Android n'est pas détecté.");
             }
         }
+    //     function addField() {
+    //         let container = document.getElementById('fieldsContainer');
+    //         let div = document.createElement('div');
+    //         div.className = 'field-row card'; // On réutilise une petite carte pour chaque champ
+    //         div.innerHTML = `
+    //     <input type="text" placeholder="Nom du champ (ex: nom)" class="f-name">
+    //     <select class="f-type">
+    //         <option value="INT">INT (Nombre)</option>
+    //         <option value="VARCHAR(255)">VARCHAR (Texte court)</option>
+    //         <option value="TEXT">TEXT (Texte long)</option>
+    //         <option value="DATE">DATE</option>
+    //     </select>
+    //     <button onclick="this.parentElement.remove()" style="background:red; font-size:10px; width:auto; padding:2px 5px;">Supprimer</button>
+    // `;
+    //         container.appendChild(div);
+    //     }
         function addField() {
             let container = document.getElementById('fieldsContainer');
             let div = document.createElement('div');
-            div.className = 'field-row card'; // On réutilise une petite carte pour chaque champ
+            div.className = 'card field-row';
             div.innerHTML = `
-        <input type="text" placeholder="Nom du champ (ex: nom)" class="f-name">
-        <select class="f-type">
-            <option value="INT">INT (Nombre)</option>
-            <option value="VARCHAR(255)">VARCHAR (Texte court)</option>
-            <option value="TEXT">TEXT (Texte long)</option>
-            <option value="DATE">DATE</option>
-        </select>
-        <button onclick="this.parentElement.remove()" style="background:red; font-size:10px; width:auto; padding:2px 5px;">Supprimer</button>
-    `;
+                <input type="text" placeholder="Nom du champ" class="f-name">
+                <select class="f-type">
+                    <option value="INT">INT</option>
+                    <option value="VARCHAR(255)">VARCHAR</option>
+                    <option value="TEXT">TEXT</option>
+                    <option value="DATE">DATE</option>
+                </select>
+                <button class="btn btn-delete" onclick="this.parentElement.remove()">Supprimer</button>
+            `;
             container.appendChild(div);
         }
 
