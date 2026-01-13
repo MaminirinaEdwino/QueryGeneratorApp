@@ -110,7 +110,7 @@ public class MainActivity extends Activity {
             
             android.content.ContentValues values = new android.content.ContentValues();
             values.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, fileName);
-            values.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "text/plain");
+            values.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream");
             values.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS);
 
             android.content.ContentResolver resolver = MainActivity.this.getContentResolver();
